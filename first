@@ -18,11 +18,12 @@ using namespace vex;
 competition Competition;
 controller Controller;
 
-vex::motor LeftMotor = vex::motor(PORT14, ratio18_1);
-vex::motor RightMotor = vex::motor(PORT6, ratio18_1);
-vex::motor IntakeMotor = vex::motor(PORT1, ratio18_1);
-vex::motor LeftClaw = vex::motor(PORT3, ratio18_1);
-vex::motor RightClaw = vex::motor(PORT8, ratio18_1);
+vex::motor LeftMotor = vex::motor(PORT2, ratio18_1);
+vex::motor RightMotor = vex::motor(PORT1, ratio18_1);
+vex::motor IntakeMotor = vex::motor(PORT3);
+vex::motor IntakeMotor2 = vex::motor(PORT5);
+vex::motor LeftClaw = vex::motor(PORT4);
+vex::motor RightClaw = vex::motor(PORT6);
 
 
 void autonomous(void){
@@ -34,10 +35,12 @@ void autonomous(void){
   LeftMotor.spin(vex::directionType::rev, 0, vex::velocityUnits::pct);
   RightMotor.spin(vex::directionType::fwd, 0 , vex::velocityUnits::pct);
   IntakeMotor.spin(vex::directionType::fwd, 127 , vex::velocityUnits::pct);
+  IntakeMotor2.spin(vex::directionType::fwd, 127, vex::velocityUnits::pct);
   LeftClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
   RightClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
   task::sleep(5000);
   IntakeMotor.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
+  IntakeMotor2.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
   LeftClaw.spin(vex::directionType::fwd,0, vex::velocityUnits::pct);
   RightClaw.spin(vex::directionType::rev,0, vex::velocityUnits::pct);
   task::sleep(100);
@@ -50,39 +53,47 @@ void autonomous(void){
 
 
 void driverControl(void){
-  //direction typr, a speed(0,127), a velocity unit
-  LeftMotor.spin(vex::directionType::rev, Controller.Axis3.value(), vex::velocityUnits::pct);
-  RightMotor.spin(vex::directionType::fwd,Controller.Axis2.value() , vex::velocityUnits::pct);
+  while(1){
+    //direction typr, a speed(0,127), a velocity unit
+    LeftMotor.spin(vex::directionType::fwd, Controller.Axis3.value(), vex::velocityUnits::pct);
+    RightMotor.spin(vex::directionType::rev,Controller.Axis2.value() , vex::velocityUnits::pct);
 
-//moves  calw inwards 
-  if(Controller.ButtonL1.pressing()){
-  LeftClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
-  RightClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+  //moves  calw inwards 
+    if(Controller.ButtonL1.pressing()){
+      LeftClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+      RightClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+    }
+    else if(Controller.ButtonL2.pressing()){
+      LeftClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+      RightClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+    }
+    else{
+      LeftClaw.stop(vex::brakeType::brake);
+      RightClaw.stop(vex::brakeType::brake);
+    }
+    //moves intake inwards 
+    if(Controller.ButtonR1.pressing()){
+      IntakeMotor.spin(vex::directionType::fwd, 127 , vex::velocityUnits::pct);
+      IntakeMotor2.spin(vex::directionType::fwd, 127, vex::velocityUnits::pct);
+    }
 
-  }
-  if(Controller.ButtonL2.pressing()){
-  LeftClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
-  RightClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+    //moves intake outwards 
+    else if(Controller.ButtonR2.pressing()){
+      IntakeMotor.spin(vex::directionType::rev, 127 , vex::velocityUnits::pct);
+      IntakeMotor2.spin(vex::directionType::rev, 127 ,vex::velocityUnits::pct);
 
-  }
-  //moves intake inwards 
-  if(Controller.ButtonR1.pressing()){
-    IntakeMotor.spin(vex::directionType::fwd, 127 , vex::velocityUnits::pct);
+    }
+
+    else{
+      //turn motor to 0      
+      //LeftClaw.stop(vex::brakeType::brake);
+      //RightClaw.stop(vex::brakeType::brake);
+      IntakeMotor.stop(vex::brakeType::brake);
+      IntakeMotor2.stop(vex::brakeType::brake);
     
+    }
   }
 
-  //moves intake outwards 
-  if(Controller.ButtonR1.pressing()){
-    IntakeMotor.spin(vex::directionType::rev, 127 , vex::velocityUnits::pct);
-
-  }
-
-  else{
-    //turn motor to 0
-  LeftClaw.spin(vex::directionType::fwd,0, vex::velocityUnits::pct);
-  RightClaw.spin(vex::directionType::rev,0, vex::velocityUnits::pct);
-  IntakeMotor.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
-  }
 }
 
 int main() {
@@ -91,5 +102,5 @@ int main() {
 
   Competition.autonomous(autonomous);
   Competition.drivercontrol(driverControl);
-  
+  driverControl();
 }
