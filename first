@@ -104,3 +104,113 @@ int main() {
   Competition.drivercontrol(driverControl);
   driverControl();
 }
+
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       manavibajpai                                              */
+/*    Created:      Wed Dec 02 2020                                           */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+//defines motors and competitions and stuff
+competition Competition;
+controller Controller;
+
+vex::motor LeftMotor = vex::motor(PORT2, ratio18_1);
+vex::motor RightMotor = vex::motor(PORT1, ratio18_1);
+vex::motor IntakeMotor = vex::motor(PORT3);
+vex::motor IntakeMotor2 = vex::motor(PORT5);
+vex::motor LeftClaw = vex::motor(PORT4);
+vex::motor RightClaw = vex::motor(PORT6);
+
+
+void autonomous(void){
+// move foward for 5 seconds
+  LeftMotor.spin(vex::directionType::fwd, 80, vex::velocityUnits::pct);
+  RightMotor.spin(vex::directionType::rev, 70, vex::velocityUnits::pct);
+  task::sleep(2000);
+  //stops drivetrain motors and starts in
+  LeftMotor.stop(vex::brakeType::brake);
+  RightMotor.stop(vex::brakeType::brake);
+  IntakeMotor.spin(vex::directionType::rev, 127 , vex::velocityUnits::pct);
+  IntakeMotor2.spin(vex::directionType::rev, 127, vex::velocityUnits::pct);
+  LeftClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+  RightClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+  task::sleep(5000);
+  IntakeMotor.stop(vex::brakeType::brake);
+  IntakeMotor2.stop(vex::brakeType::brake);
+  LeftClaw.stop(vex::brakeType::brake);
+  RightClaw.stop(vex::brakeType::brake);
+  LeftMotor.stop(vex::brakeType::brake);
+  RightMotor.stop(vex::brakeType::brake);
+  task::sleep(2000);
+  LeftMotor.spin(vex::directionType::rev, 80, vex::velocityUnits::pct);
+  RightMotor.spin(vex::directionType::fwd , 80, vex::velocityUnits::pct);
+  task::sleep(1000); 
+  LeftMotor.stop(vex::brakeType::brake);
+  RightMotor.stop(vex::brakeType::brake);
+}
+
+
+void driverControl(void){
+  while(1){
+    //direction typr, a speed(0,127), a velocity unit
+    LeftMotor.spin(vex::directionType::fwd, Controller.Axis3.value(), vex::velocityUnits::pct);
+    RightMotor.spin(vex::directionType::rev,Controller.Axis2.value() , vex::velocityUnits::pct);
+
+  //moves  calw inwards 
+    if(Controller.ButtonL1.pressing()){
+      LeftClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+      RightClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+    }
+    else if(Controller.ButtonL2.pressing()){
+      LeftClaw.spin(vex::directionType::rev,127, vex::velocityUnits::pct);
+      RightClaw.spin(vex::directionType::fwd,127, vex::velocityUnits::pct);
+    }
+    else{
+      LeftClaw.stop(vex::brakeType::brake);
+      RightClaw.stop(vex::brakeType::brake);
+    }
+    //moves intake inwards 
+    if(Controller.ButtonR1.pressing()){
+      IntakeMotor.spin(vex::directionType::fwd, 127 , vex::velocityUnits::pct);
+      IntakeMotor2.spin(vex::directionType::fwd, 127, vex::velocityUnits::pct);
+    }
+
+    //moves intake outwards 
+    else if(Controller.ButtonR2.pressing()){
+      IntakeMotor.spin(vex::directionType::rev, 127 , vex::velocityUnits::pct);
+      IntakeMotor2.spin(vex::directionType::rev, 127 ,vex::velocityUnits::pct);
+
+    }
+
+    else{
+      //turn motor to 0      
+      //LeftClaw.stop(vex::brakeType::brake);
+      //RightClaw.stop(vex::brakeType::brake);
+      IntakeMotor.stop(vex::brakeType::brake);
+      IntakeMotor2.stop(vex::brakeType::brake);
+    
+    }
+  }
+
+}
+
+int main() {
+  // Initializing Robot Configuration. DO NOT REMOVE!
+  vexcodeInit();
+
+  //Competition.autonomous(autonomous);
+  //Competition.drivercontrol(driverControl);
+  autonomous();
+  driverControl();
+}
